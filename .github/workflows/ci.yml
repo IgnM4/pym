@@ -38,7 +38,7 @@ jobs:
             apps/api/package-lock.json
 
       - name: Install deps (omit optional native deps)
-        run: npm ci --omit=optional
+        run: npm install --omit=optional --no-audit --no-fund
 
       - name: TypeScript version
         run: npx tsc -v
