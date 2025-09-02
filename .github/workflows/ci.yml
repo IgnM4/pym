@@ -46,3 +46,7 @@ jobs:
 
       - name: Build
         run: npm run -w apps/api build --if-present
+
+      - name: Ensure @types/node present in workspace
+        run: npm ls -w apps/api @types/node --depth=0 || npm i -w apps/api -D @types/node
+
