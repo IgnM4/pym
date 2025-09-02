@@ -29,27 +29,22 @@ const allowStartWithoutDb: boolean = process.env.ALLOW_START_WITHOUT_DB === "tru
 initPool()
   .catch((err: unknown) => {
     const msg = err instanceof Error ? err.message : String(err);
-    // eslint-disable-next-line no-console
     console.error("No se pudo conectar a la base de datos:", msg);
     if (!allowStartWithoutDb) {
       process.exit(1);
     }
-    // eslint-disable-next-line no-console
     console.warn("Continuando sin conexión a la BD por ALLOW_START_WITHOUT_DB=true");
   })
   .finally(() => {
     const server = app.listen(PORT, () => {
-      // eslint-disable-next-line no-console
       console.log(`API en http://localhost:${PORT}`);
     });
 
     server.on("error", (err: unknown) => {
       const e = err as NodeJS.ErrnoException;
       if (e && e.code === "EADDRINUSE") {
-        // eslint-disable-next-line no-console
         console.error(`Puerto ${PORT} en uso.`);
       } else {
-        // eslint-disable-next-line no-console
         console.error(e);
       }
       process.exit(1);
@@ -61,19 +56,16 @@ app.use((_req: Request, res: Response) => res.status(404).json({ error: "Not fou
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   const msg = err instanceof Error ? err.message : "Internal error";
-  // eslint-disable-next-line no-console
   console.error("Unhandled error:", err);
   res.status(500).json({ error: msg });
 });
 
 // Graceful shutdown
 async function shutdown(signal: NodeJS.Signals): Promise<void> {
-  // eslint-disable-next-line no-console
   console.log(`\nRecibido ${signal}, cerrando...`);
   try {
     await closePool();
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error("Error al cerrar pool:", e);
     process.exit(1);
     return;
