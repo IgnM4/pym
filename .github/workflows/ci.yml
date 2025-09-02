@@ -33,11 +33,13 @@ jobs:
           cache-dependency-path: |
             package-lock.json
 
-      # Instala TODO con el lockfile del root respetando workspaces
       - name: Install deps (workspaces, include dev, omit optional)
         run: npm install --workspaces --include=dev --omit=optional --no-audit --no-fund
 
-      # Ejecuta scripts en el workspace de la API
+      # Opcional pero útil para evitar sorpresas
+      - name: Ensure @types/node present in workspace
+        run: npm ls -w apps/api @types/node --depth=0 || npm i -w apps/api -D @types/node
+
       - name: Type check
         run: npm run -w apps/api typecheck --if-present
 
@@ -46,7 +48,3 @@ jobs:
 
       - name: Build
         run: npm run -w apps/api build --if-present
-
-      - name: Ensure @types/node present in workspace
-        run: npm ls -w apps/api @types/node --depth=0 || npm i -w apps/api -D @types/node
-
