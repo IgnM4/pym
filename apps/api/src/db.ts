@@ -35,7 +35,6 @@ async function createPoolWithRetry(maxRetries = 5, baseDelayMs = 500): Promise<v
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      // eslint-disable-next-line no-console
       console.log("DB init", {
         attempt: `${attempt}/${maxRetries}`,
         user,
@@ -61,18 +60,15 @@ async function createPoolWithRetry(maxRetries = 5, baseDelayMs = 500): Promise<v
       await cn.close();
 
       dbHealthy = true;
-      // eslint-disable-next-line no-console
       console.log("Conexión a Oracle establecida y verificada ✅");
       return;
     } catch (err: unknown) {
       dbHealthy = false;
       const msg = err instanceof Error ? err.message : String(err);
-      // eslint-disable-next-line no-console
       console.error(`Error conectando a Oracle (intento ${attempt}/${maxRetries}):`, msg);
 
       // Si es claramente credencial/DSN, no sigas reintentando a ciegas
       if (/ORA-01017|ORA-12154|ORA-12514|ORA-12541|ORA-12545/.test(msg)) {
-        // eslint-disable-next-line no-console
         console.error("Verifica DB_USER/DB_PASSWORD/DB_CONNECT. Abortando reintentos.");
         throw err;
       }
@@ -126,14 +122,12 @@ export async function withConn<T>(fn: (cn: oracledb.Connection) => Promise<T>): 
 // Cierre ordenado (por ejemplo al recibir SIGTERM en producción)
 export async function closePool(): Promise<void> {
   if (pool) {
-    // eslint-disable-next-line no-console
     console.log("Cerrando pool de Oracle...");
     try {
       await pool.close(5); // espera hasta 5s a que terminen
     } finally {
       pool = undefined;
       dbHealthy = false;
-      // eslint-disable-next-line no-console
       console.log("Pool cerrado.");
     }
   }
