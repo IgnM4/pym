@@ -1,11 +1,10 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import "dotenv/config";
 import cors from "cors";
-import oracledb from "oracledb";
 
 import ventas from "./routes/ventas.js";
 import clientes from "./routes/clientes.js";
-import { initPool, isDbHealthy } from "./db.js";
+import { initPool, isDbHealthy, closePool } from "./db.js";
 
 const app = express();
 
@@ -14,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Health
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({ db: isDbHealthy() ? "up" : "down" });
 });
 
@@ -23,62 +22,67 @@ app.use("/api/ventas", ventas);
 app.use("/api/clientes", clientes);
 
 // Config puertos
-const PORT = Number(process.env.API_PORT ?? process.env.PORT ?? 4000);
-const allowStartWithoutDb = process.env.ALLOW_START_WITHOUT_DB === "true";
+const PORT: number = Number(process.env.API_PORT ?? process.env.PORT ?? 4000);
+const allowStartWithoutDb: boolean = process.env.ALLOW_START_WITHOUT_DB === "true";
 
 // Arranque
 initPool()
-  .catch((err: any) => {
-    console.error("No se pudo conectar a la base de datos:", err?.message ?? err);
+  .catch((err: unknown) => {
+    const msg = err instanceof Error ? err.message : String(err);
+    // eslint-disable-next-line no-console
+    console.error("No se pudo conectar a la base de datos:", msg);
     if (!allowStartWithoutDb) {
       process.exit(1);
     }
+    // eslint-disable-next-line no-console
     console.warn("Continuando sin conexión a la BD por ALLOW_START_WITHOUT_DB=true");
   })
   .finally(() => {
     const server = app.listen(PORT, () => {
+      // eslint-disable-next-line no-console
       console.log(`API en http://localhost:${PORT}`);
     });
 
-    server.on("error", (err: any) => {
-      if (err && err.code === "EADDRINUSE") {
+    server.on("error", (err: unknown) => {
+      const e = err as NodeJS.ErrnoException;
+      if (e && e.code === "EADDRINUSE") {
+        // eslint-disable-next-line no-console
         console.error(`Puerto ${PORT} en uso.`);
       } else {
-        console.error(err);
+        // eslint-disable-next-line no-console
+        console.error(e);
       }
       process.exit(1);
     });
   });
 
 // 404 y handler de errores
-app.use((_req, res) => res.status(404).json({ error: "Not found" }));
-app.use((err: any, _req: any, res: any, _next: any) => {
+app.use((_req: Request, res: Response) => res.status(404).json({ error: "Not found" }));
+
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  const msg = err instanceof Error ? err.message : "Internal error";
+  // eslint-disable-next-line no-console
   console.error("Unhandled error:", err);
-  res.status(500).json({ error: err?.message ?? "Internal error" });
+  res.status(500).json({ error: msg });
 });
 
 // Graceful shutdown
-function shutdown(signal: string) {
+async function shutdown(signal: NodeJS.Signals): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log(`\nRecibido ${signal}, cerrando...`);
-  Promise.resolve()
-    .then(async () => {
-      try {
-        // cierra el pool si existe
-        const pool = oracledb.getPool();
-        await pool.close(5);
-      } catch {
-        // pool no iniciado o ya cerrado
-      }
-    })
-    .finally(() => process.exit(0))
-    .catch((err) => {
-      console.error("Error al cerrar pool:", err);
-      process.exit(1);
-    });
+  try {
+    await closePool();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("Error al cerrar pool:", e);
+    process.exit(1);
+    return;
+  }
+  process.exit(0);
 }
 
-process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => { void shutdown("SIGINT"); });
+process.on("SIGTERM", () => { void shutdown("SIGTERM"); });
 
 // (opcional) exporta app para tests e2e/supertest
 export default app;
