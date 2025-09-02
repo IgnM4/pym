@@ -3,7 +3,6 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default [
-  // Ignorar rutas y archivos que no queremos lint-ear
   {
     ignores: [
       "dist/**",
@@ -13,18 +12,15 @@ export default [
     ],
   },
 
-  // Reglas base de JS y TS (no type-checked para evitar necesitar tsconfig project)
   js.configs.recommended,
   ...tseslint.configs.recommended,
 
-  // Ajustes comunes del proyecto (TS/JS)
   {
     files: ["**/*.{ts,tsx,js,cjs}"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
       parser: tseslint.parser,
-      // Globals típicos de Node para que no marque 'module', 'process', etc.
       globals: {
         console: "readonly",
         module: "readonly",
@@ -39,10 +35,20 @@ export default [
     rules: {
       "no-console": "off",
       "no-empty": ["error", { allowEmptyCatch: true }],
+
+      // ✅ Ignora variables/args capturados si comienzan con "_"
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
 
-  // Permitir `any` en stubs de tipos (solo .d.ts dentro de /types)
+  // Permitir any en stubs de tipos
   {
     files: ["types/**/*.d.ts"],
     rules: {
@@ -51,7 +57,7 @@ export default [
     },
   },
 
-  // (Temporal) Relajar `any` en rutas mientras tipeamos DTOs
+  // (Temporal) Relajar any en rutas
   {
     files: ["src/routes/**/*.ts"],
     rules: {
