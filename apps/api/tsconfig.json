@@ -10,7 +10,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "types": ["node"],
-    "typeRoots": ["./node_modules/@types", "./types"],
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true
