@@ -1,6 +1,0 @@
-dist/
-node_modules/
-
-# No lint a archivos de config
-.eslintrc.cjs
-*.config.cjs
