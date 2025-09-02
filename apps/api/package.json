@@ -1,0 +1,39 @@
+{
+  "name": "api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/app.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/app.js",
+    "prestart": "npm run build",
+    "migrate": "powershell -ExecutionPolicy Bypass -File ./migrate.ps1",
+    "db:check": "powershell -NoProfile -File ./db-check.ps1",
+    "lint": "eslint . --ext .ts,.tsx,.js,.cjs",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "cors": "^2.8.5"
+  },
+  "optionalDependencies": {
+    "oracledb": "^6.9.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/express": "^4.17.23",
+    "@types/node": "^20.19.11",
+    "@types/cors": "^2.8.17",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

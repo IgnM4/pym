@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="
+                     http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+  <changeSet id="001-tables" author="sgbd">
+    <sqlFile path="../ddl/01_tables.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="002-constraints" author="sgbd">
+    <sqlFile path="../ddl/02_constraints.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="003-indexes" author="sgbd">
+    <sqlFile path="../ddl/03_indexes.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="004-views" author="sgbd">
+    <!-- Ojo: apuntas a 05_views.sql; si así está el archivo, OK -->
+    <sqlFile path="../ddl/05_views.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="005-seed" author="sgbd" runOnChange="true">
+    <sqlFile path="../ddl/06_seed.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="006-triggers" author="sgbd">
+    <sqlFile path="../ddl/07_triggers.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"/>
+  </changeSet>
+
+  <changeSet id="007-ext-tables" author="sgbd" context="dev">
+    <sqlFile path="../ddl/11_external_tables_fix.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="008-sucursal" author="sgbd">
+    <sqlFile path="../ddl/08_sucursal.sql" relativeToChangelogFile="true"/>
+    <rollback>
+      <sql>
+        ALTER TABLE inventario DROP CONSTRAINT fk_inv_sucursal;
+        ALTER TABLE inventario DROP COLUMN id_sucursal;
+        DROP TABLE sucursal CASCADE CONSTRAINTS PURGE;
+        DROP INDEX ix_inv__sucursal;
+      </sql>
+    </rollback>
+  </changeSet>
+
+  <changeSet id="012-rut-chile" author="sgbd">
+    <sqlFile path="../ddl/12_rut_chile.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"/>
+  </changeSet>
+
+  <changeSet id="013-export-csv" author="sgbd">
+    <sqlFile path="../ddl/13_export_csv.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"/>
+  </changeSet>
+
+  <!-- A PARTIR DE AQUÍ: mismos includes pero con guiones medios -->
+  <include file="changelog/013-export-dir.xml"          relativeToChangelogFile="true"/>
+  <include file="changelog/014-mv-kpis.xml"             relativeToChangelogFile="true"/>
+  <include file="changelog/015-scheduler-kpis.xml"      relativeToChangelogFile="true"/>
+  <include file="changelog/016-export-procs.xml"        relativeToChangelogFile="true"/>
+  <include file="changelog/017-views-kpi.xml"           relativeToChangelogFile="true"/>
+  <include file="changelog/018-scheduler-export.xml"    relativeToChangelogFile="true"/>
+  <include file="changelog/019-indexes-perf.xml"        relativeToChangelogFile="true"/>
+  <include file="changelog/020-monitoring.xml"          relativeToChangelogFile="true"/>
+  <include file="changelog/021-core-ubicaciones-inventario.xml" relativeToChangelogFile="true"/>
+  <include file="changelog/022-conteos-diarios.xml"     relativeToChangelogFile="true"/>
+  <include file="changelog/023-pendientes-vacio.xml"    relativeToChangelogFile="true"/>
+  <include file="changelog/024-compras.xml"             relativeToChangelogFile="true"/>
+  <include file="changelog/025-ventas-ubicacion.xml"    relativeToChangelogFile="true"/>
+  <include file="changelog/026-caja-cuentas.xml"        relativeToChangelogFile="true"/>
+  <include file="changelog/027-lista-precios.xml"       relativeToChangelogFile="true"/>
+  <include file="changelog/028-geo-clientes.xml"        relativeToChangelogFile="true"/>
+  <include file="changelog/029-venta-idempotencia.xml" relativeToChangelogFile="true"/>
+  <include file="changelog/030-app-context.xml" relativeToChangelogFile="true"/>
+  <include file="changelog/031-trigger-boleta-usuario.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

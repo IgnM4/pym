@@ -1,0 +1,39 @@
+﻿# ---- OS & editors ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---- Node / TS ----
+node_modules/
+dist/
+build/
+.cache/
+coverage/
+.npmrc
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# ---- Monorepo (adjust if needed) ----
+apps/*/dist/
+packages/*/dist/
+apps/*/.env*
+packages/*/.env*
+
+# ---- Logs & local data ----
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.pid
+
+# ---- Misc ----
+.tmp/
+*.local.*
+*.secret.*
+.env
+.env.*
+!.env.example

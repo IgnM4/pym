@@ -1,0 +1,11 @@
+Variables sensibles requeridas:
+
+- DB_USER / DB_PASSWORD / DB_CONNECT_STRING o DB_URL: usados por el backend Node (server/.env). Proveen usuario, contraseña y cadena de conexión de Oracle.
+- APP_DB_URL / APP_DB_USER / APP_DB_PASSWORD: usados por la app de escritorio (desktop-app/app.properties).
+- LIQUI_URL / LIQUI_USER / LIQUI_PASS: para Liquibase y scripts/publish_web.mjs (db-project/liquibase/liquibase.properties.example).
+- SQLCL_BIN: ruta al ejecutable de SQLcl para scripts/publish_web.mjs.
+- EXPORT_DIR: directorio donde la app de escritorio genera los CSV consumidos por la web.
+- ORACLE_PASSWORD: contraseña inicial del contenedor Oracle (docker-compose.yml).
+- API_PORT: puerto expuesto por la API cuando se usa Docker Compose.
+
+No incluyas estos valores en el repositorio. Define cada variable en tu entorno local o en archivos .env/.properties no versionados.

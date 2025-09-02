@@ -1,0 +1,19 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="
+                     http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="014-mv-kpis" author="sgbd">
+    <sqlFile path="../../ddl/14_mv_kpis.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             endDelimiter="/"/>
+    <rollback>
+      <sql>DROP INDEX ix_mv_ventas_diarias__dia;</sql>
+      <sql>DROP INDEX ix_mv_vpp__sku;</sql>
+      <sql>DROP MATERIALIZED VIEW mv_ventas_diarias;</sql>
+      <sql>DROP MATERIALIZED VIEW mv_ventas_por_producto;</sql>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
