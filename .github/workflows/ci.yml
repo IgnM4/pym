@@ -6,11 +6,15 @@ on:
     tags: [ 'v*' ]
     paths:
       - "apps/api/**"
+      - "desktop-app/**"
+      - "db-project/**"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [ main, master, develop ]
     paths:
       - "apps/api/**"
+      - "desktop-app/**"
+      - "db-project/**"
       - ".github/workflows/ci.yml"
 
 concurrency:
@@ -66,6 +70,50 @@ jobs:
         with:
           name: openapi
           path: apps/api/dist/openapi.json
+
+  maven:
+    name: Test & Package Desktop App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: desktop-app/pom.xml
+
+      - name: Test
+        run: mvn -q -f desktop-app/pom.xml test
+
+      - name: Package
+        run: mvn -q -f desktop-app/pom.xml package
+
+  liquibase:
+    name: Liquibase status
+    runs-on: ubuntu-latest
+    env:
+      LIQUI_URL: offline:postgresql
+      LIQUI_USER: dummy
+      LIQUI_PASS: dummy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Liquibase CLI
+        run: |
+          curl -sL https://github.com/liquibase/liquibase/releases/latest/download/liquibase.zip -o liquibase.zip
+          unzip -q liquibase.zip -d liquibase
+          sudo ln -s $GITHUB_WORKSPACE/liquibase/liquibase /usr/local/bin/liquibase
+
+      - name: Prepare properties
+        run: cp db-project/liquibase/liquibase.properties.example db-project/liquibase/liquibase.properties
+
+      - name: Status
+        run: liquibase --defaultsFile=db-project/liquibase/liquibase.properties status
 
   release_api:
     needs: api
