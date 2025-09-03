@@ -1,12 +1,13 @@
 {
   "name": "api",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "tsx src/app.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/app.js",
-    "prestart": "npm run build",
+    "build": "tsc -p tsconfig.json && npm run openapi:gen",
+    "start:prod": "node dist/app.js",
+    "openapi:gen": "tsx src/openapi.ts",
     "migrate": "powershell -ExecutionPolicy Bypass -File ./migrate.ps1",
     "db:check": "powershell -NoProfile -File ./db-check.ps1",
     "lint": "eslint . --ext .ts,.tsx,.js,.cjs",
@@ -19,7 +20,12 @@
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "cors": "^2.8.5",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "pino": "^9.9.0",
+    "pino-http": "^10.5.0",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^7.5.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "optionalDependencies": {
     "oracledb": "^6.9.0"
@@ -30,6 +36,9 @@
     "@types/node": "^20.19.11",
     "@types/cors": "^2.8.17",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@asteasolutions/zod-to-openapi": "^7.3.2",
+    "pino-pretty": "^11.0.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.6.2",

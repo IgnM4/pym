@@ -1,33 +1,36 @@
-services:
-  oracle-xe:
-    image: gvenzl/oracle-xe:21-slim
-    container_name: app-oracle-xe-1
-    ports: ["1521:1521","5500:5500"]
-    environment:
-      ORACLE_PASSWORD: "Admin#1234"
-      ORACLE_DATABASE: "XEPDB1"
-      APP_USER: "APP_PYME"
-      APP_USER_PASSWORD: "app_pyme_pass"
-    volumes:
-      - oradata:/opt/oracle/oradata
-    healthcheck:
-      test: ["CMD-SHELL","echo 'select 1 from dual;' | sqlplus -s / as sysdba || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 40
-    restart: unless-stopped
-
-  api:
-    build: ./apps/api
-    environment:
-      PORT: "4000"
-      DB_USER: "APP_PYME"
-      DB_PASSWORD: "app_pyme_pass"
-      DB_CONNECT: "oracle-xe:1521/XEPDB1"
-    ports: ["4000:4000"]
-    depends_on:
-      oracle-xe:
-        condition: service_healthy
-
-volumes:
-  oradata:
+# Development reference, commented out by default
+# services:
+#   db:
+#     image: gvenzl/oracle-xe:21-slim
+#     ports:
+#       - "1521:1521"
+#       - "5500:5500"
+#     environment:
+#       ORACLE_PASSWORD: "Admin#1234"
+#       ORACLE_DATABASE: "XEPDB1"
+#       APP_USER: "APP_PYME"
+#       APP_USER_PASSWORD: "app_pyme_pass"
+#     volumes:
+#       - oradata:/opt/oracle/oradata
+#     healthcheck:
+#       test: ["CMD-SHELL", "echo 'select 1 from dual;' | sqlplus -s / as sysdba || exit 1"]
+#       interval: 15s
+#       timeout: 5s
+#       retries: 40
+#
+#   api:
+#     build: ./apps/api
+#     environment:
+#       PORT: "4000"
+#       DB_USER: "APP_PYME"
+#       DB_PASSWORD: "app_pyme_pass"
+#       DB_CONNECT: "db:1521/XEPDB1"
+#       ALLOWED_ORIGINS: "http://localhost:5173"
+#     ports:
+#       - "4000:4000"
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#
+# volumes:
+#   oradata:

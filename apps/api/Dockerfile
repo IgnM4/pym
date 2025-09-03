@@ -1,19 +1,21 @@
-FROM node:20-alpine AS deps
+# syntax=docker/dockerfile:1
+FROM node:20-alpine AS base
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
 
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+FROM base AS deps
+COPY package*.json ./
+RUN npm ci --omit=optional --include=dev
+
+FROM deps AS build
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine
+FROM base AS runtime
 WORKDIR /app
-ENV NODE_ENV=production
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+RUN npm prune --omit=dev
 COPY --from=build /app/dist ./dist
-COPY package*.json ./
-RUN npm ci --omit=dev
+USER node
 EXPOSE 4000
 CMD ["node","dist/app.js"]
