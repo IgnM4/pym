@@ -10,6 +10,11 @@ const envSchema = z.object({
   LOG_LEVEL: z.string().default("info"),
   ALLOWED_ORIGINS: z.string().default(""),
   TRUST_PROXY: z.string().optional().transform(v => v === "true").default("false"),
+  JWT_SECRET: z.string(),
+  JWT_EXPIRES_IN: z.string().default("15m"),
+  REFRESH_EXPIRES_IN: z.string().default("7d"),
+  API_KEY_SALT: z.string(),
+  IDEMPOTENCY_TTL_SEC: z.coerce.number().int().positive().default(86_400),
 });
 
 const parsed = envSchema.parse(process.env);
@@ -26,6 +31,15 @@ const config = {
     .map(o => o.trim())
     .filter(o => o.length > 0),
   trustProxy: parsed.TRUST_PROXY,
+  auth: {
+    jwtSecret: parsed.JWT_SECRET,
+    jwtExpiresIn: parsed.JWT_EXPIRES_IN,
+    refreshExpiresIn: parsed.REFRESH_EXPIRES_IN,
+    apiKeySalt: parsed.API_KEY_SALT,
+  },
+  limits: {
+    idempotencyTtlSec: parsed.IDEMPOTENCY_TTL_SEC,
+  },
 };
 
 export type Config = typeof config;

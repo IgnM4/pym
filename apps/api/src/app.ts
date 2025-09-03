@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import "dotenv/config";
 import cors from "cors";
 import helmet from "helmet";
@@ -10,6 +10,9 @@ import swaggerUi from "swagger-ui-express";
 
 import ventas from "./routes/ventas.js";
 import clientes from "./routes/clientes.js";
+import authRoutes from "./routes/auth.js";
+import { bearerAuth, requireRole } from "./middleware/auth.js";
+import { apiKeyAuth } from "./middleware/apiKey.js";
 import { initPool, isDbHealthy, closePool } from "./db.js";
 import errorHandler from "./middleware/error.js";
 import logger from "./logger.js";
@@ -72,6 +75,14 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+function authOrApiKey(req: Request, res: Response, next: NextFunction): void {
+  if (req.headers["x-api-key"]) {
+    void apiKeyAuth(req, res, next);
+    return;
+  }
+  void bearerAuth(req, res, next);
+}
+
 app.get("/health", (_req: Request, res: Response) => {
   res.json({ db: isDbHealthy() ? "up" : "down" });
 });
@@ -81,8 +92,19 @@ app.get("/ready", (_req: Request, res: Response) => {
   res.status(healthy ? 200 : 503).json({ db: healthy ? "up" : "down" });
 });
 
-app.use("/api/ventas", ventas);
-app.use("/api/clientes", clientes);
+app.use("/auth", authRoutes);
+app.use(
+  "/api/ventas",
+  authOrApiKey,
+  requireRole("admin", "ventas"),
+  ventas
+);
+app.use(
+  "/api/clientes",
+  authOrApiKey,
+  requireRole("admin", "ventas", "consulta"),
+  clientes
+);
 
 const openApiPath = path.join(__dirname, "openapi.json");
 app.get("/openapi.json", (_req, res) => {

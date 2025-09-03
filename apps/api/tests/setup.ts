@@ -14,3 +14,10 @@ vi.mock("oracledb", () => {
     },
   };
 });
+
+process.env.JWT_SECRET = "test-secret";
+process.env.JWT_EXPIRES_IN = "15m";
+process.env.REFRESH_EXPIRES_IN = "7d";
+process.env.API_KEY_SALT = "salt";
+process.env.IDEMPOTENCY_TTL_SEC = "86400";
+process.env.ALLOW_START_WITHOUT_DB = "true";
