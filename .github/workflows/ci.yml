@@ -83,6 +83,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set image repository
+        run: echo "IMAGE_REPOSITORY=${GITHUB_REPOSITORY,,}-api" >> $GITHUB_ENV
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -90,9 +93,9 @@ jobs:
           file: apps/api/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}-api:sha-${{ github.sha }}
-            ${{ startsWith(github.ref, 'refs/tags/v') && format('ghcr.io/{0}-api:{1}', github.repository, github.ref_name) || '' }}
-            ${{ startsWith(github.ref, 'refs/tags/v') && format('ghcr.io/{0}-api:latest', github.repository) || '' }}
+            ghcr.io/${{ env.IMAGE_REPOSITORY }}:sha-${{ github.sha }}
+            ${{ startsWith(github.ref, 'refs/tags/v') && format('ghcr.io/{0}:{1}', env.IMAGE_REPOSITORY, github.ref_name) || '' }}
+            ${{ startsWith(github.ref, 'refs/tags/v') && format('ghcr.io/{0}:latest', env.IMAGE_REPOSITORY) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -100,7 +103,7 @@ jobs:
         if: env.TRIVY_SCAN == 'true'
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: ghcr.io/${{ github.repository }}-api:sha-${{ github.sha }}
+          image-ref: ghcr.io/${{ env.IMAGE_REPOSITORY }}:sha-${{ github.sha }}
           format: sarif
           output: trivy.sarif
 
