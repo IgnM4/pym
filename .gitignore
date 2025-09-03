@@ -37,3 +37,6 @@ packages/*/.env*
 .env
 .env.*
 !.env.example
+
+# ---- Desktop app ----
+desktop-app/target/
