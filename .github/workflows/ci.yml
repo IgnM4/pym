@@ -21,6 +21,9 @@ jobs:
   api:
     name: Lint & Build API (workspaces)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20.x]
 
     steps:
       - name: Checkout
@@ -29,7 +32,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ matrix.node }}
           cache: "npm"
           cache-dependency-path: |
             package-lock.json
@@ -37,21 +40,26 @@ jobs:
       - name: Install deps (workspaces, include dev, omit optional)
         run: npm install --workspaces --include=dev --omit=optional --no-audit --no-fund
 
-      - name: Test
-        run: npm run -w apps/api test
-
-      # Opcional pero útil para evitar sorpresas
       - name: Ensure @types/node present in workspace
         run: npm ls -w apps/api @types/node --depth=0 || npm i -w apps/api -D @types/node
 
-      - name: Type check
-        run: npm run -w apps/api typecheck --if-present
-
       - name: Lint
-        run: npm run -w apps/api lint --if-present
+        run: npm run -w apps/api lint
+
+      - name: Type check
+        run: npm run -w apps/api typecheck
+
+      - name: Test
+        run: npm run -w apps/api test -- --coverage
+
+      - name: Depcheck
+        run: npm run -w apps/api depcheck || true
+
+      - name: Audit
+        run: npm audit --audit-level=high || true
 
       - name: Build
-        run: npm run -w apps/api build --if-present
+        run: npm run -w apps/api build
 
       - name: Upload OpenAPI spec
         uses: actions/upload-artifact@v4

@@ -4,8 +4,6 @@ npm-debug.log
 .env
 tests
 .git
-Dockerfile
 docker-compose.yml
-*.ts
 *.md
 vitest.config.ts

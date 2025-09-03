@@ -16,11 +16,15 @@ export default [
   ...tseslint.configs.recommended,
 
   {
-    files: ["**/*.{ts,tsx,js,cjs}"],
+    files: ["src/**/*.{ts,tsx,js,cjs}"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
       parser: tseslint.parser,
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
       globals: {
         console: "readonly",
         module: "readonly",
@@ -44,6 +48,12 @@ export default [
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
         },
+      ],
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { prefer: "type-imports", disallowTypeAnnotations: false }
       ],
     },
   },
