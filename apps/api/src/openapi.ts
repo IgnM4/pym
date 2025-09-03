@@ -6,6 +6,7 @@ import {
   OpenApiGeneratorV3,
   extendZodWithOpenApi,
 } from "@asteasolutions/zod-to-openapi";
+import type { OpenAPIObjectConfig } from "@asteasolutions/zod-to-openapi/dist/v3.0/openapi-generator";
 
 import config from "./config.js";
 import pkg from "../package.json";
@@ -212,13 +213,14 @@ const document = generator.generateDocument({
     version: pkg.version,
   },
   servers: [{ url: `http://localhost:${config.port}` }],
-  components: {
-    securitySchemes: {
-      bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
-      apiKeyAuth: { type: "apiKey", in: "header", name: "x-api-key" },
-    },
+} as OpenAPIObjectConfig);
+document.components = {
+  ...document.components,
+  securitySchemes: {
+    bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+    apiKeyAuth: { type: "apiKey", in: "header", name: "x-api-key" },
   },
-} as any);
+};
 
 export function generateOpenApi(): void {
   const outDir = join(process.cwd(), "dist");
