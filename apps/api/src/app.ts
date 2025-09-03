@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import "dotenv/config";
 import cors from "cors";
 import helmet from "helmet";
