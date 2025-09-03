@@ -15,6 +15,8 @@ import errorHandler from "./middleware/error.js";
 import logger from "./logger.js";
 import config from "./config.js";
 
+type ResWithTime = Response & { responseTime?: number };
+
 const app = express();
 
 if (config.trustProxy) {
@@ -32,14 +34,14 @@ app.use(
       return id;
     },
     customReceivedMessage: (req) => `--> ${req.method} ${req.url}`,
-    customSuccessMessage: (req, res) =>
+    customSuccessMessage: (req, res: ResWithTime) =>
       `<-- ${req.method} ${req.url} ${res.statusCode} ${
         res.getHeader("content-length") ?? 0
-      }b ${(res as any).responseTime}ms`,
-    customErrorMessage: (req, res, err) =>
-      `<-- ${req.method} ${req.url} ${res.statusCode} ${(res as any).responseTime}ms ${
-        err.message
-      }`,
+      }b ${res.responseTime ?? 0}ms`,
+    customErrorMessage: (req, res: ResWithTime, err: Error) =>
+      `<-- ${req.method} ${req.url} ${res.statusCode} ${
+        res.responseTime ?? 0
+      }ms ${err.message}`,
     redact: {
       paths: ["req.headers.authorization", "req.body.password"],
       censor: "***",
