@@ -37,7 +37,6 @@
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.2",
-    "@esbuild/linux-x64": "^0.25.9",
     "@eslint/js": "^9.34.0",
     "@rollup/rollup-linux-x64-gnu": "^4.50.0",
     "@types/bcryptjs": "^2.4.6",
@@ -52,7 +51,7 @@
     "pino-pretty": "^11.0.0",
     "prettier": "^3.6.2",
     "supertest": "^7.0.0",
-    "tsx": "^4.20.5",
+    "tsx": "^4.15.0",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.42.0",
     "vitest": "^2.1.5"
