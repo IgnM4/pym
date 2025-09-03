@@ -14,10 +14,6 @@ export const ventaBodySchema = z.object({
 });
 export type VentaBody = z.infer<typeof ventaBodySchema>;
 
-export const ventaHeaderSchema = z.object({
-  "x-user-id": z.coerce.number().int().positive(),
-});
-
 export interface VentaResponse {
   ok: true;
   idBoleta: number;
@@ -30,8 +26,4 @@ export interface VentaResponse {
 
 export function parseVentaBody(req: Request): VentaBody {
   return ventaBodySchema.parse(req.body);
-}
-
-export function parseUserIdFromHeaders(req: Request): number {
-  return ventaHeaderSchema.parse(req.headers)["x-user-id"];
 }

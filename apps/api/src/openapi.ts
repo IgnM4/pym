@@ -6,22 +6,107 @@ import {
   OpenApiGeneratorV3,
   extendZodWithOpenApi,
 } from "@asteasolutions/zod-to-openapi";
+import type { OpenAPIObjectConfig } from "@asteasolutions/zod-to-openapi/dist/v3.0/openapi-generator";
 
-import config from "./config.js";
 import pkg from "../package.json";
 import {
   clienteBodySchema,
   clienteIdParamsSchema,
 } from "./dto/clientes.dto.js";
+import { ventaBodySchema } from "./dto/ventas.dto.js";
 import {
-  ventaBodySchema,
-  ventaHeaderSchema,
-} from "./dto/ventas.dto.js";
+  loginBodySchema,
+  refreshBodySchema,
+  apiKeyBodySchema,
+} from "./dto/auth.dto.js";
 
 extendZodWithOpenApi(z);
 
+const port = Number(process.env.PORT) || 3000;
+
 const registry = new OpenAPIRegistry();
 
+const tokensSchema = registry.register(
+  "AuthTokens",
+  z.object({ accessToken: z.string(), refreshToken: z.string() })
+);
+const apiKeyResponseSchema = registry.register(
+  "ApiKeyResponse",
+  z.object({ apiKey: z.string() })
+);
+
+registry.registerPath({
+  method: "post",
+  path: "/auth/login",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: loginBodySchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Tokens",
+      content: { "application/json": { schema: tokensSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/auth/refresh",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: refreshBodySchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Tokens",
+      content: { "application/json": { schema: tokensSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/auth/logout",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: refreshBodySchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Logout",
+      content: { "application/json": { schema: z.object({ ok: z.boolean() }) } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/auth/apikey",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: apiKeyBodySchema },
+      },
+    },
+  },
+  security: [{ bearerAuth: [] }],
+  responses: {
+    201: {
+      description: "API key",
+      content: { "application/json": { schema: apiKeyResponseSchema } },
+    },
+  },
+});
 const clienteSchema = registry.register(
   "Cliente",
   clienteBodySchema.extend({ id: z.number().int().positive() })
@@ -30,6 +115,7 @@ const clienteSchema = registry.register(
 registry.registerPath({
   method: "get",
   path: "/api/clientes",
+  security: [{ bearerAuth: [] }, { apiKeyAuth: [] }],
   responses: {
     200: {
       description: "Lista de clientes",
@@ -45,6 +131,7 @@ registry.registerPath({
 registry.registerPath({
   method: "post",
   path: "/api/clientes",
+  security: [{ bearerAuth: [] }, { apiKeyAuth: [] }],
   request: {
     body: {
       content: {
@@ -65,6 +152,7 @@ registry.registerPath({
 registry.registerPath({
   method: "get",
   path: "/api/clientes/{id}",
+  security: [{ bearerAuth: [] }, { apiKeyAuth: [] }],
   request: { params: clienteIdParamsSchema },
   responses: {
     200: {
@@ -99,8 +187,9 @@ const ventaResponseSchema = registry.register(
 registry.registerPath({
   method: "post",
   path: "/api/ventas",
+  security: [{ bearerAuth: [] }, { apiKeyAuth: [] }],
   request: {
-    headers: ventaHeaderSchema,
+    headers: z.object({ "Idempotency-Key": z.string().optional() }),
     body: {
       content: {
         "application/json": { schema: ventaBodySchema },
@@ -124,8 +213,15 @@ const document = generator.generateDocument({
     title: "API",
     version: pkg.version,
   },
-  servers: [{ url: `http://localhost:${config.port}` }],
-});
+  servers: [{ url: `http://localhost:${port}` }],
+} as OpenAPIObjectConfig);
+document.components = {
+  ...document.components,
+  securitySchemes: {
+    bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+    apiKeyAuth: { type: "apiKey", in: "header", name: "x-api-key" },
+  },
+};
 
 export function generateOpenApi(): void {
   const outDir = join(process.cwd(), "dist");
