@@ -56,12 +56,4 @@ export default [
       "@typescript-eslint/no-empty-object-type": "off",
     },
   },
-
-  // (Temporal) Relajar any en rutas
-  {
-    files: ["src/routes/**/*.ts"],
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-    },
-  },
 ];

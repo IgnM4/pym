@@ -36,6 +36,9 @@ jobs:
       - name: Install deps (workspaces, include dev, omit optional)
         run: npm install --workspaces --include=dev --omit=optional --no-audit --no-fund
 
+      - name: Test
+        run: npm run -w apps/api test
+
       # Opcional pero útil para evitar sorpresas
       - name: Ensure @types/node present in workspace
         run: npm ls -w apps/api @types/node --depth=0 || npm i -w apps/api -D @types/node

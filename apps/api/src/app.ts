@@ -1,10 +1,11 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { Request, Response } from "express";
 import "dotenv/config";
 import cors from "cors";
 
 import ventas from "./routes/ventas.js";
 import clientes from "./routes/clientes.js";
 import { initPool, isDbHealthy, closePool } from "./db.js";
+import errorHandler from "./middleware/error.js";
 
 const app = express();
 
@@ -25,40 +26,37 @@ app.use("/api/clientes", clientes);
 const PORT: number = Number(process.env.API_PORT ?? process.env.PORT ?? 4000);
 const allowStartWithoutDb: boolean = process.env.ALLOW_START_WITHOUT_DB === "true";
 
-// Arranque
-initPool()
-  .catch((err: unknown) => {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("No se pudo conectar a la base de datos:", msg);
-    if (!allowStartWithoutDb) {
-      process.exit(1);
-    }
-    console.warn("Continuando sin conexión a la BD por ALLOW_START_WITHOUT_DB=true");
-  })
-  .finally(() => {
-    const server = app.listen(PORT, () => {
-      console.log(`API en http://localhost:${PORT}`);
-    });
-
-    server.on("error", (err: unknown) => {
-      const e = err as NodeJS.ErrnoException;
-      if (e && e.code === "EADDRINUSE") {
-        console.error(`Puerto ${PORT} en uso.`);
-      } else {
-        console.error(e);
+// Arranque (omitido en tests)
+if (!process.env.VITEST) {
+  initPool()
+    .catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("No se pudo conectar a la base de datos:", msg);
+      if (!allowStartWithoutDb) {
+        process.exit(1);
       }
-      process.exit(1);
+      console.warn("Continuando sin conexión a la BD por ALLOW_START_WITHOUT_DB=true");
+    })
+    .finally(() => {
+      const server = app.listen(PORT, () => {
+        console.log(`API en http://localhost:${PORT}`);
+      });
+
+      server.on("error", (err: unknown) => {
+        const e = err as NodeJS.ErrnoException;
+        if (e && e.code === "EADDRINUSE") {
+          console.error(`Puerto ${PORT} en uso.`);
+        } else {
+          console.error(e);
+        }
+        process.exit(1);
+      });
     });
-  });
+}
 
 // 404 y handler de errores
 app.use((_req: Request, res: Response) => res.status(404).json({ error: "Not found" }));
-
-app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  const msg = err instanceof Error ? err.message : "Internal error";
-  console.error("Unhandled error:", err);
-  res.status(500).json({ error: msg });
-});
+app.use(errorHandler);
 
 // Graceful shutdown
 async function shutdown(signal: NodeJS.Signals): Promise<void> {
