@@ -2,6 +2,13 @@ import { execSync } from 'child_process';
 import { existsSync, mkdirSync, readdirSync, copyFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
+// Environment variables:
+//   SQLCL_BIN   - path to Oracle SQLcl `sql` executable
+//   LIQUI_USER  - database user for exporting KPIs
+//   LIQUI_PASS  - password for the user
+//   LIQUI_URL   - connection string (host:port/service)
+//   EXPORT_DIR  - directory containing exported CSV files
+
 const sqlcl = process.env.SQLCL_BIN;
 const dbUser = process.env.LIQUI_USER;
 const dbPass = process.env.LIQUI_PASS;
