@@ -5,13 +5,16 @@
   "type": "commonjs",
   "scripts": {
     "dev": "tsx src/app.ts",
+    "start:dev": "tsx src/app.ts",
     "build": "tsc -p tsconfig.json && npm run openapi:gen",
     "start:prod": "node dist/app.js",
     "openapi:gen": "tsx src/openapi.ts",
+    "coverage": "npm run test -- --coverage",
     "migrate": "powershell -ExecutionPolicy Bypass -File ./migrate.ps1",
     "db:check": "powershell -NoProfile -File ./db-check.ps1",
     "lint": "eslint . --ext .ts,.tsx,.js,.cjs",
     "lint:fix": "eslint . --fix",
+    "depcheck": "npx depcheck --ignores=oracledb",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "ROLLUP_DISABLE_NATIVE=1 vitest run",
     "test:watch": "ROLLUP_DISABLE_NATIVE=1 vitest"
@@ -34,6 +37,7 @@
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.2",
+    "@esbuild/linux-x64": "^0.25.9",
     "@eslint/js": "^9.34.0",
     "@rollup/rollup-linux-x64-gnu": "^4.50.0",
     "@types/bcryptjs": "^2.4.6",
@@ -42,6 +46,7 @@
     "@types/node": "^20.19.11",
     "@types/supertest": "^6.0.3",
     "@types/swagger-ui-express": "^4.1.6",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "pino-pretty": "^11.0.0",
