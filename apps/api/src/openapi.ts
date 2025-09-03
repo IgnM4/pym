@@ -8,7 +8,6 @@ import {
 } from "@asteasolutions/zod-to-openapi";
 import type { OpenAPIObjectConfig } from "@asteasolutions/zod-to-openapi/dist/v3.0/openapi-generator";
 
-import config from "./config.js";
 import pkg from "../package.json";
 import {
   clienteBodySchema,
@@ -22,6 +21,8 @@ import {
 } from "./dto/auth.dto.js";
 
 extendZodWithOpenApi(z);
+
+const port = Number(process.env.PORT) || 3000;
 
 const registry = new OpenAPIRegistry();
 
@@ -212,7 +213,7 @@ const document = generator.generateDocument({
     title: "API",
     version: pkg.version,
   },
-  servers: [{ url: `http://localhost:${config.port}` }],
+  servers: [{ url: `http://localhost:${port}` }],
 } as OpenAPIObjectConfig);
 document.components = {
   ...document.components,
